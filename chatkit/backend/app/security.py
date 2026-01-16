@@ -50,11 +50,20 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
 
 def verify_api_key(request: Request):
     """Dependency to verify API Key."""
-    api_key = request.headers.get(SecurityConfig.API_KEY_HEADER)
-    if api_key != SecurityConfig.REQUIRED_API_KEY:
+    required_key = SecurityConfig.REQUIRED_API_KEY
+    if not required_key:
+        logger.critical("CRITICAL: ENTERPRISE_API_KEY is not configured on the server.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service not configured.",
+        )
+
+    provided_key = request.headers.get(SecurityConfig.API_KEY_HEADER)
+
+    if not provided_key or not secrets.compare_digest(provided_key, required_key):
         logger.warning(f"Unauthorized access attempt from {request.client.host if request.client else 'unknown'}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API Key",
         )
-    return api_key
+    return provided_key
