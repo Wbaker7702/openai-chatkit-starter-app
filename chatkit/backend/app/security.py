@@ -11,7 +11,7 @@ logger = logging.getLogger("enterprise-security")
 
 class SecurityConfig:
     API_KEY_HEADER = "X-Enterprise-Auth"
-    REQUIRED_API_KEY = "enterprise-secret-key-123"  # In production, load from env
+    REQUIRED_API_KEY = os.getenv("ENTERPRISE_API_KEY")  # In production, load from env
     ENABLE_PII_REDACTION = True
 
 def redact_pii(text: str) -> str:
