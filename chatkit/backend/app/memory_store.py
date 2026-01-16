@@ -5,12 +5,14 @@ A production app would implement this using a persistant database.
 
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 
 from chatkit.store import NotFoundError, Store
 from chatkit.types import Attachment, Page, ThreadItem, ThreadMetadata
 from .security import redact_pii
 
+logger = logging.getLogger(__name__)
 
 class MemoryStore(Store[dict]):
     def __init__(self):
@@ -60,9 +62,9 @@ class MemoryStore(Store[dict]):
                 # but let's try direct assignment first as this is a starter app.
                 try:
                     item.content = redact_pii(item.content)
-                except Exception:
+                except Exception as e:
                     # Fallback if immutable
-                    pass
+                    logger.warning(f"Failed to redact PII from item {item.id if hasattr(item, 'id') else 'unknown'}: {e}")
 
     async def add_thread_item(
         self, thread_id: str, item: ThreadItem, context: dict

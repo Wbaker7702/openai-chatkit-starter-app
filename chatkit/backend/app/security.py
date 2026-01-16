@@ -1,7 +1,7 @@
 import re
 import logging
 import time
-from typing import Any, Callable
+from typing import Callable
 from fastapi import Request, Response, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
