@@ -60,9 +60,9 @@ class MemoryStore(Store[dict]):
                 # We need to modify the item. Assuming it's a Pydantic model or mutable object.
                 # If it's a Pydantic model, we might need to use model_copy if it's frozen, 
                 # but let's try direct assignment first as this is a starter app.
-                try:
-                    item.content = redact_pii(item.content)
                 except Exception as e:
+                    logger.warning(f"Failed to redact item content: {e}")
+                    pass
                     # Fallback if immutable
                     logger.warning(f"Failed to redact PII from item {item.id if hasattr(item, 'id') else 'unknown'}: {e}")
 
