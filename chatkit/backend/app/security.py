@@ -44,9 +44,9 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
             # Log Response
             logger.info(f"Response: {response.status_code} | Duration: {process_time:.4f}s")
             return response
-        except Exception as e:
-            logger.error(f"Request failed: {str(e)}")
-            raise e
+        except Exception:
+            logger.exception("Request failed")
+            raise
 
 def verify_api_key(request: Request):
     """Dependency to verify API Key."""
