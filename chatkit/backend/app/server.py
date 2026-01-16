@@ -11,11 +11,24 @@ from chatkit.types import ThreadMetadata, ThreadStreamEvent, UserMessageItem
 
 from .memory_store import MemoryStore
 from agents import Agent
+from .tools import get_ticket_status
 
 
 MAX_RECENT_ITEMS = 30
 MODEL = "gpt-4.1-mini"
 
+
+support_agent = Agent[AgentContext[dict[str, Any]]](
+    model=MODEL,
+    name="Support Specialist",
+    instructions=(
+        "You are a Support Specialist. You can look up ticket statuses using "
+        "the get_ticket_status tool. "
+        "If you cannot find a ticket or the user has other questions, "
+        "handoff back to the Starter Assistant."
+    ),
+    tools=[get_ticket_status],
+)
 
 assistant_agent = Agent[AgentContext[dict[str, Any]]](
     model=MODEL,
@@ -23,9 +36,13 @@ assistant_agent = Agent[AgentContext[dict[str, Any]]](
     instructions=(
         "You are a concise, helpful assistant. "
         "Keep replies short and focus on directly answering "
-        "the user's request."
+        "the user's request. "
+        "If the user asks about a support ticket status, handoff to the Support Specialist."
     ),
+    handoffs=[support_agent],
 )
+
+support_agent.handoffs = [assistant_agent]
 
 
 class StarterChatServer(ChatKitServer[dict[str, Any]]):
