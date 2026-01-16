@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from chatkit.server import StreamingResult
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from .server import StarterChatServer
+from .security import AuditLogMiddleware, verify_api_key
 
 app = FastAPI(title="ChatKit Starter API")
+
+app.add_middleware(AuditLogMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,7 +26,7 @@ chatkit_server = StarterChatServer()
 
 
 @app.post("/chatkit")
-async def chatkit_endpoint(request: Request) -> Response:
+async def chatkit_endpoint(request: Request, _ = Depends(verify_api_key)) -> Response:
     """Proxy the ChatKit web component payload to the server implementation."""
     payload = await request.body()
     result = await chatkit_server.process(payload, {"request": request})

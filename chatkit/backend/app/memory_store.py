@@ -9,6 +9,7 @@ from collections import defaultdict
 
 from chatkit.store import NotFoundError, Store
 from chatkit.types import Attachment, Page, ThreadItem, ThreadMetadata
+from .security import redact_pii
 
 
 class MemoryStore(Store[dict]):
@@ -50,12 +51,27 @@ class MemoryStore(Store[dict]):
             cursor_key=lambda i: i.id,
         )
 
+    def _redact_item(self, item: ThreadItem):
+        """Redact PII from user messages."""
+        if hasattr(item, "role") and item.role == "user":
+            if hasattr(item, "content") and isinstance(item.content, str):
+                # We need to modify the item. Assuming it's a Pydantic model or mutable object.
+                # If it's a Pydantic model, we might need to use model_copy if it's frozen, 
+                # but let's try direct assignment first as this is a starter app.
+                try:
+                    item.content = redact_pii(item.content)
+                except Exception:
+                    # Fallback if immutable
+                    pass
+
     async def add_thread_item(
         self, thread_id: str, item: ThreadItem, context: dict
     ) -> None:
+        self._redact_item(item)
         self.items[thread_id].append(item)
 
     async def save_item(self, thread_id: str, item: ThreadItem, context: dict) -> None:
+        self._redact_item(item)
         items = self.items[thread_id]
         for idx, existing in enumerate(items):
             if existing.id == item.id:

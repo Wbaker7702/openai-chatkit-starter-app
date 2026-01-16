@@ -1,9 +1,15 @@
 import { ChatKit, useChatKit } from "@openai/chatkit-react";
-import { CHATKIT_API_DOMAIN_KEY, CHATKIT_API_URL } from "../lib/config";
+import { CHATKIT_API_DOMAIN_KEY, CHATKIT_API_URL, CHATKIT_API_KEY } from "../lib/config";
 
 export function ChatKitPanel() {
   const chatkit = useChatKit({
-    api: { url: CHATKIT_API_URL, domainKey: CHATKIT_API_DOMAIN_KEY },
+    api: { 
+      url: CHATKIT_API_URL, 
+      domainKey: CHATKIT_API_DOMAIN_KEY,
+      headers: {
+        "X-Enterprise-Auth": CHATKIT_API_KEY,
+      }
+    },
     composer: {
       // File uploads are disabled for the demo backend.
       attachments: { enabled: false },
