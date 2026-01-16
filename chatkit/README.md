@@ -3,6 +3,8 @@
 Minimal Vite + React UI paired with a FastAPI backend that forwards chat
 requests to OpenAI through the ChatKit server library.
 
+Uses `openai-chatkit` v1.5.3+ and `@openai/chatkit-react` v1.4.1+.
+
 ## Quick start
 
 ```bash

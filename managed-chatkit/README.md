@@ -3,6 +3,8 @@
 Vite + React UI that talks to a FastAPI session backend for creating ChatKit
 workflow sessions.
 
+Uses `@openai/chatkit-react` v1.4.1+.
+
 ## Quick start
 
 ```bash
